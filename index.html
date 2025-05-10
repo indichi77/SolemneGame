@@ -5,40 +5,114 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Med-Tech Quest Integrado</title>
   <style>
-    body       {
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #game-container { max-width: 700px; margin: auto; border: 1px solid #ccc; padding: 20px; border-radius: 8px; }
+    .hidden { display: none; }
+    .btn { display: inline-block; margin: 8px 4px; padding: 8px; border: 1px solid #333; border-radius: 4px; cursor: pointer; background: #fafafa; }
+    .btn:hover { background: #eee; }
+    #feedback { margin-top: 12px; font-weight: bold; min-height: 1.2em; }
+    #status { display: flex; justify-content: space-between; margin-bottom: 16px; }
+    #track { margin-top: 20px; }
+    .cell { display: inline-block; width: 18px; height: 18px; border: 1px solid #333; margin-right: 2px; }
+    .filled { background: #333; }
+    #controls { margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="status">
+      <div id="team-label">Equipo A</div>
+      <div>Fichas: <span id="tokens">5</span></div>
+    </div>
+
+    <div id="case-content">
+      <h3 id="case-title"></h3>
+      <p id="case-text"></p>
+    </div>
+
+    <div id="questions">
+      <div id="questionA" class="question-block">
+        <p><strong>Pregunta A (Fisiología):</strong> <span id="qA-text"></span></p>
+      </div>
+      <div id="questionB" class="question-block hidden">
+        <p><strong>Pregunta B (Fisiopatología):</strong> <span id="qB-text"></span></p>
+      </div>
+      <div id="questionC" class="question-block hidden">
+        <p><strong>Pregunta C (Farmacología/Intervención):</strong> <span id="qC-text"></span></p>
+      </div>
+    </div>
+
+    <div id="options"></div>
+    <div id="feedback"></div>
+
+    <div id="controls">
+      <button id="prev-question" class="btn hidden">Pregunta Anterior</button>
+      <button id="next-case" class="btn hidden">Siguiente Caso</button>
+    </div>
+
+    <div id="track">Progreso: <span id="cells"></span></div>
+  </div>
+
+  <script>
+    const cases = [
+      {
+        title: 'Caso 1: Infección, fiebre, fase aguda',
+        text: 'Un lactante de 8 meses presenta fiebre vespertina de 38–39.5 °C, escalofríos, taquicardia y decaimiento. Laboratorio: leucocitos elevados, PCR alta, procalcitonina elevada, sodio levemente bajo.',
+        questions: { A: '¿Qué mediador inicia la fiebre?', B: '¿Mecanismo de daño tisular?', C: '¿Intervención antipirética?' },
+        options: { A: ['Histamina','IL-1','TNF‑α'], B: ['Neutrófilos liberan enzimas','Trombos en capilares','Colágeno excesivo'], C: ['Ibuprofeno','Corticoide','Paracetamol'] },
+        correct: { A: '2', B: '1', C: '1' },
+        feedback: {
+          A: { '1':'No. La histamina no eleva el set-point.','2':'Sí. IL-1 induce prostaglandinas que elevan el punto de ajuste.','3':'No. TNF‑α es secundario.' },
+          B: { '1':'Sí. Neutrófilos liberan enzimas que lesionan tejido.','2':'No. Trombos no son típicos de fase aguda.','3':'No. Colágeno aparece en cicatrización.' },
+          C: { '1':'Sí. Ibuprofeno inhibe COX y baja prostaglandinas.','2':'No. Corticoides no son primera línea.','3':'No. Paracetamol solo antipirético.' }
+        }
+      },
+      {
+        title: 'Caso 2: Coagulación intravascular diseminada',
+        text: 'Paciente en UCI por sepsis con sangrado en encías, hematuria, equimosis y petequias. Hemograma: plaquetas bajas; TP y TTPa prolongados; esquistocitos en frotis.',
+        questions: { A: '¿Qué falla primero?', B: '¿Evento que explica sangrado y trombosis?', C: '¿Intervención urgente?' },
+        options: { A: ['Tapón plaquetario','Vasoconstricción','Fibrinólisis'], B: ['Plaquetas bloquean fibrinógeno','Fibrinólisis sistémica','Consumo de factores y fibrina','Inhibición vía extrínseca'], C: ['Transfusión plaquetas/plasma','Heparina HBPM','Ácido tranexámico'] },
+        correct: { A: '1', B: '3', C: '1' },
+        feedback: {
+          A: { '1':'Sí. La plaquetopenia impide el tapón inicial.','2':'No. La vasoconstricción sigue.','3':'No. Fibrinólisis es secundaria.' },
+          B: { '1':'Incorrecto. No bloquea fibrinógeno.','2':'Incorrecto. No destruye inicialmente el tapón.','3':'Correcto. Consumo y microtrombos causan sangrado y trombosis.','4':'Incorrecto. No hay inhibición extrínseca.' },
+          C: { '1':'Correcto. Reposición de plaquetas y factores.','2':'Incorrecto. Agrava sangrado.','3':'Incorrecto. Contraindicado en CIVD.' }
+        }
+      },
+      {
         title: 'Caso 3: Hemofilia A en niño con hemarthrosis',
-        text: 'Niño de 12 años presenta hematomas frecuentes y dolor articular tras golpes leves. Laboratorio: TTPa prolongado, TP normal, plaquetas normales, factor VIII disminuido.',
-        questions: { A: '¿Qué fase está comprometida?', B: '¿Defecto molecular?', C: 'Tratamiento agudo?' },
+        text: 'Niño de 12 años con hematomas frecuentes y dolor articular tras golpes leves. Laboratorio: TTPa prolongado, TP normal, plaquetas normales, factor VIII bajo.',
+        questions: { A: '¿Fase comprometida?', B: '¿Defecto molecular?', C: 'Tratamiento agudo?' },
         options: { A: ['Primaria','Secundaria','Fibrinólisis'], B: ['vWF','VIII','Plasmina'], C: ['DDAVP','VitK','Plaquetas'] },
         correct: { A: '2', B: '2', C: '1' },
         feedback: {
-          A: { '1':'No. Tapón plaquetario normal.','2':'Sí. Falla fase secundaria.','3':'No. Fibrinólisis posterior.' },
-          B: { '1':'No. vWF normal.','2':'Sí. Factor VIII bajo.','3':'No. Sin hiperfibrinólisis.' },
+          A: { '1':'No. Tapón normal.','2':'Sí. Falla coagulación secundaria.','3':'No. Fibrinólisis posterior.' },
+          B: { '1':'No. vWF normal.','2':'Sí. VIII bajo.','3':'No. Sin hiperfibrinólisis.' },
           C: { '1':'Sí. DDAVP libera VIII.','2':'No. VitK ineficaz.','3':'No. Plaquetas normales.' }
         }
       },
       {
-        title: 'Caso 4: Eficacia de AINE vs paracetamol',
-        text: 'Mujer de 32 años con dolor muscular e infección viral. Paracetamol c/6h sin alivio. Se cambia a AINE no selectivo.',
-        questions: { A: '¿Mecanismo antipirético del paracetamol?', B: '¿Por qué no alivia el dolor muscular?', C: '¿Ventaja del AINE?' },
-        options: { A: ['COX central','Opioides','Neuronal'], B: ['No inhibe COX periférica','No entra SNC','No bloquea bradiquinina','No vasoconstriñe'], C: ['COX1/2 periférica','Vida media','Endorfinas','H1'] },
+        title: 'Caso 4: AINE vs paracetamol',
+        text: 'Mujer de 32 años con dolor muscular por infección viral. Paracetamol c/6h sin alivio. Se cambia a AINE no selectivo.',
+        questions: { A: '¿Mecanismo antipirético?', B: '¿Por qué no alivia dolor?', C: '¿Ventaja del AINE?' },
+        options: { A: ['COX central','Opioide','Neuronal'], B: ['No inhibe COX periférica','Entra mal al SNC','No bloquea bradiquinina','No vasoconstriñe'], C: ['COX1/2 periférica','Vida media','Endorfinas','H1'] },
         correct: { A: '1', B: '1', C: '1' },
         feedback: {
-          A: { '1':'Correcto. Inhibe COX en SNC.','2':'Incorrecto. No es opioide.','3':'Incorrecto. Reduce prostaglandinas.' },
-          B: { '1':'Correcto. Sin efecto antiinflamatorio periférico.','2':'Incorrecto. Actúa en SNC.','3':'Incorrecto. Bradiquinina no clave.','4':'Incorrecto. No antihistamínico.' },
-          C: { '1':'Correcto. Disminuye prostaglandinas periféricas.','2':'Incorrecto. No afecta paracetamol.','3':'Incorrecto. No libera endorfinas.','4':'Incorrecto. No bloquea H1.' }
+          A: { '1':'Correcto. Inhibe COX central.','2':'Incorrecto.','3':'Incorrecto.' },
+          B: { '1':'Correcto. Sin efecto periférico.','2':'Incorrecto.','3':'Incorrecto.','4':'Incorrecto.' },
+          C: { '1':'Correcto. Reduce prostaglandinas periféricas.','2':'Incorrecto.','3':'Incorrecto.','4':'Incorrecto.' }
         }
       },
       {
-        title: 'Caso 5: Tejido de granulación tras quemadura',
-        text: 'Paciente con quemadura de segundo grado en brazo muestra tejido de granulación durante la fase proliferativa.',
-        questions: { A: '¿Qué célula produce la matriz extracelular?', B: '¿Función de esta célula?', C: '¿Qué compone la matriz?' },
+        title: 'Caso 5: Granulación tras quemadura',
+        text: 'Paciente con quemadura de segundo grado en brazo. Fase proliferativa: tejido de granulación.',
+        questions: { A: '¿Quién produce la matriz?', B: '¿Función?', C: '¿Matriz principal?' },
         options: { A: ['Neutrófilos','Endoteliales','Fibroblastos','Macrófagos'], B: ['Inflaman','Forman vasos','Sintetizan colágeno','Fagocitan'], C: ['Procolágeno','Factores de crecimiento','Oxígeno'] },
         correct: { A: '3', B: '3', C: '1' },
         feedback: {
-          A: { '1':'Incorrecto. Neutrófilos limpian, no sintetizan matriz.','2':'Incorrecto. Endoteliales forman capilares.','3':'Correcto. Fibroblastos sintetizan colágeno y proteínas.','4':'Incorrecto. Macrófagos limpian detritos.' },
-          B: { '1':'No. Infiltran y eliminan patógenos.','2':'No. Endoteliales forman vasos.','3':'Sí. Producen colágeno para sostén.','4':'No. Fagocitan restos.' },
-          C: { '1':'Correcto. Procolágeno se convierte en colágeno.','2':'No. Son señales, no matriz principal.','3':'No. Matriz no es gas.' }
+          A: { '1':'No. Limpian.','2':'No. Forman vasos.','3':'Sí. Sintetizan colágeno.','4':'No. Fagocitan.' },
+          B: { '1':'No.','2':'No.','3':'Sí.','4':'No.' },
+          C: { '1':'Correcto. Procolágeno → colágeno.','2':'No.','3':'No.' }
         }
       }
     ];
@@ -113,19 +187,12 @@
         const cell = document.getElementById('cell' + (currentCase + 1)); if (cell) cell.classList.add('filled');
       }
       prevBtn.classList.remove('hidden');
-      if (q === 'C') nextBtn.classList.remove('hidden');
+      if (q==='C') nextBtn.classList.remove('hidden');
       Array.from(optionsEl.children).forEach(b => b.disabled = true);
     }
 
-    prevBtn.addEventListener('click', () => {
-      if (stage === 'B') showStage('A'); else if (stage === 'C') showStage('B');
-    });
-
-    nextBtn.addEventListener('click', () => {
-      currentCase++;
-      if (currentCase < cases.length) loadCase(currentCase);
-      else alert('¡Juego completado! Fichas finales: ' + tokens);
-    });
+    prevBtn.addEventListener('click', () => { if (stage==='B') showStage('A'); else if (stage==='C') showStage('B'); });
+    nextBtn.addEventListener('click', () => { currentCase++; if (currentCase<cases.length) loadCase(currentCase); else alert('¡Juego completado! Fichas finales: '+tokens); });
 
     loadCase(0);
   </script>
