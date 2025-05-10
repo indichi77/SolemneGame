@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Med-Tech Quest Integrado</title>
+  <style>
+    body       {
+        title: 'Caso 3: Hemofilia A en niño con hemarthrosis',
+        text: 'Niño de 12 años presenta hematomas frecuentes y dolor articular tras golpes leves. Laboratorio: TTPa prolongado, TP normal, plaquetas normales, factor VIII disminuido.',
+        questions: { A: '¿Qué fase está comprometida?', B: '¿Defecto molecular?', C: 'Tratamiento agudo?' },
+        options: { A: ['Primaria','Secundaria','Fibrinólisis'], B: ['vWF','VIII','Plasmina'], C: ['DDAVP','VitK','Plaquetas'] },
+        correct: { A: '2', B: '2', C: '1' },
+        feedback: {
+          A: { '1':'No. Tapón plaquetario normal.','2':'Sí. Falla fase secundaria.','3':'No. Fibrinólisis posterior.' },
+          B: { '1':'No. vWF normal.','2':'Sí. Factor VIII bajo.','3':'No. Sin hiperfibrinólisis.' },
+          C: { '1':'Sí. DDAVP libera VIII.','2':'No. VitK ineficaz.','3':'No. Plaquetas normales.' }
+        }
+      },
+      {
+        title: 'Caso 4: Eficacia de AINE vs paracetamol',
+        text: 'Mujer de 32 años con dolor muscular e infección viral. Paracetamol c/6h sin alivio. Se cambia a AINE no selectivo.',
+        questions: { A: '¿Mecanismo antipirético del paracetamol?', B: '¿Por qué no alivia el dolor muscular?', C: '¿Ventaja del AINE?' },
+        options: { A: ['COX central','Opioides','Neuronal'], B: ['No inhibe COX periférica','No entra SNC','No bloquea bradiquinina','No vasoconstriñe'], C: ['COX1/2 periférica','Vida media','Endorfinas','H1'] },
+        correct: { A: '1', B: '1', C: '1' },
+        feedback: {
+          A: { '1':'Correcto. Inhibe COX en SNC.','2':'Incorrecto. No es opioide.','3':'Incorrecto. Reduce prostaglandinas.' },
+          B: { '1':'Correcto. Sin efecto antiinflamatorio periférico.','2':'Incorrecto. Actúa en SNC.','3':'Incorrecto. Bradiquinina no clave.','4':'Incorrecto. No antihistamínico.' },
+          C: { '1':'Correcto. Disminuye prostaglandinas periféricas.','2':'Incorrecto. No afecta paracetamol.','3':'Incorrecto. No libera endorfinas.','4':'Incorrecto. No bloquea H1.' }
+        }
+      },
+      {
+        title: 'Caso 5: Tejido de granulación tras quemadura',
+        text: 'Paciente con quemadura de segundo grado en brazo muestra tejido de granulación durante la fase proliferativa.',
+        questions: { A: '¿Qué célula produce la matriz extracelular?', B: '¿Función de esta célula?', C: '¿Qué compone la matriz?' },
+        options: { A: ['Neutrófilos','Endoteliales','Fibroblastos','Macrófagos'], B: ['Inflaman','Forman vasos','Sintetizan colágeno','Fagocitan'], C: ['Procolágeno','Factores de crecimiento','Oxígeno'] },
+        correct: { A: '3', B: '3', C: '1' },
+        feedback: {
+          A: { '1':'Incorrecto. Neutrófilos limpian, no sintetizan matriz.','2':'Incorrecto. Endoteliales forman capilares.','3':'Correcto. Fibroblastos sintetizan colágeno y proteínas.','4':'Incorrecto. Macrófagos limpian detritos.' },
+          B: { '1':'No. Infiltran y eliminan patógenos.','2':'No. Endoteliales forman vasos.','3':'Sí. Producen colágeno para sostén.','4':'No. Fagocitan restos.' },
+          C: { '1':'Correcto. Procolágeno se convierte en colágeno.','2':'No. Son señales, no matriz principal.','3':'No. Matriz no es gas.' }
+        }
+      }
+    ];
+
+    let currentCase = 0;
+    let stage = 'A';
+    let tokens = 5;
+    const trackCells = cases.length;
+
+    const titleEl = document.getElementById('case-title');
+    const textEl = document.getElementById('case-text');
+    const qAText = document.getElementById('qA-text');
+    const qBText = document.getElementById('qB-text');
+    const qCText = document.getElementById('qC-text');
+    const optionsEl = document.getElementById('options');
+    const feedbackEl = document.getElementById('feedback');
+    const tokensEl = document.getElementById('tokens');
+    const nextBtn = document.getElementById('next-case');
+    const prevBtn = document.getElementById('prev-question');
+    const cellsContainer = document.getElementById('cells');
+
+    // Inicializar track
+    for (let i = 1; i <= trackCells; i++) {
+      const span = document.createElement('span'); span.className = 'cell'; span.id = 'cell' + i; cellsContainer.appendChild(span);
+    }
+
+    function loadCase(n) {
+      const c = cases[n];
+      titleEl.textContent = c.title;
+      textEl.textContent = c.text;
+      qAText.textContent = c.questions.A;
+      qBText.textContent = c.questions.B;
+      qCText.textContent = c.questions.C;
+      document.getElementById('questionA').classList.remove('hidden');
+      document.getElementById('questionB').classList.add('hidden');
+      document.getElementById('questionC').classList.add('hidden');
+      feedbackEl.textContent = '';
+      stage = 'A';
+      prevBtn.classList.add('hidden');
+      nextBtn.classList.add('hidden');
+      renderOptions();
+    }
+
+    function renderOptions() {
+      optionsEl.innerHTML = '';
+      const c = cases[currentCase];
+      c.options[stage].forEach((text, i) => {
+        const btn = document.createElement('button'); btn.className = 'btn';
+        const val = (i + 1).toString(); btn.textContent = text;
+        btn.dataset.q = stage; btn.dataset.value = val;
+        btn.addEventListener('click', onOptionClick);
+        optionsEl.appendChild(btn);
+      });
+    }
+
+    function showStage(s) {
+      ['A','B','C'].forEach(x => document.getElementById('question' + x).classList.toggle('hidden', x !== s));
+      stage = s;
+      feedbackEl.textContent = '';
+      renderOptions();
+      prevBtn.classList.toggle('hidden', stage === 'A');
+      nextBtn.classList.add('hidden');
+    }
+
+    function onOptionClick(e) {
+      const q = e.target.dataset.q, val = e.target.dataset.value;
+      const c = cases[currentCase];
+      feedbackEl.textContent = c.feedback[q][val];
+      tokens += (val === c.correct[q]) ? 1 : -1;
+      tokensEl.textContent = tokens;
+      if (q === 'C' && val === c.correct[q]) {
+        const cell = document.getElementById('cell' + (currentCase + 1)); if (cell) cell.classList.add('filled');
+      }
+      prevBtn.classList.remove('hidden');
+      if (q === 'C') nextBtn.classList.remove('hidden');
+      Array.from(optionsEl.children).forEach(b => b.disabled = true);
+    }
+
+    prevBtn.addEventListener('click', () => {
+      if (stage === 'B') showStage('A'); else if (stage === 'C') showStage('B');
+    });
+
+    nextBtn.addEventListener('click', () => {
+      currentCase++;
+      if (currentCase < cases.length) loadCase(currentCase);
+      else alert('¡Juego completado! Fichas finales: ' + tokens);
+    });
+
+    loadCase(0);
+  </script>
+</body>
+</html>
+Add plain index.html prototype
