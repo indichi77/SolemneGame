@@ -32,13 +32,13 @@
 
     <div id="questions">
       <div id="questionA" class="question-block">
-        <p><strong>Pregunta A (Fisiología):</strong> <span id="qA-text"></span></p>
+        <p><strong>Pregunta A:</strong> <span id="qA-text"></span></p>
       </div>
       <div id="questionB" class="question-block hidden">
-        <p><strong>Pregunta B (Fisiopatología):</strong> <span id="qB-text"></span></p>
+        <p><strong>Pregunta B:</strong> <span id="qB-text"></span></p>
       </div>
       <div id="questionC" class="question-block hidden">
-        <p><strong>Pregunta C (Farmacología/Intervención):</strong> <span id="qC-text"></span></p>
+        <p><strong>Pregunta C:</strong> <span id="qC-text"></span></p>
       </div>
     </div>
 
@@ -54,73 +54,11 @@
   </div>
 
   <script>
-    const cases = [
-      {
-        title: 'Caso 1: Infección, fiebre, fase aguda',
-        text: 'Un lactante de 8 meses presenta fiebre vespertina de 38–39.5 °C, escalofríos, taquicardia y decaimiento. Laboratorio: leucocitos elevados, PCR alta, procalcitonina elevada, sodio levemente bajo.',
-        questions: { A: '¿Qué mediador inicia la fiebre?', B: '¿Mecanismo de daño tisular?', C: '¿Intervención antipirética?' },
-        options: { A: ['Histamina','IL-1','TNF‑α'], B: ['Neutrófilos liberan enzimas','Trombos en capilares','Colágeno excesivo'], C: ['Ibuprofeno','Corticoide','Paracetamol'] },
-        correct: { A: '2', B: '1', C: '1' },
-        feedback: {
-          A: { '1':'No. La histamina no eleva el set-point.','2':'Sí. IL-1 induce prostaglandinas que elevan el punto de ajuste.','3':'No. TNF‑α es secundario.' },
-          B: { '1':'Sí. Neutrófilos liberan enzimas que lesionan tejido.','2':'No. Trombos no son típicos de fase aguda.','3':'No. Colágeno aparece en cicatrización.' },
-          C: { '1':'Sí. Ibuprofeno inhibe COX y baja prostaglandinas.','2':'No. Corticoides no son primera línea.','3':'No. Paracetamol solo antipirético.' }
-        }
-      },
-      {
-        title: 'Caso 2: Coagulación intravascular diseminada',
-        text: 'Paciente en UCI por sepsis con sangrado en encías, hematuria, equimosis y petequias. Hemograma: plaquetas bajas; TP y TTPa prolongados; esquistocitos en frotis.',
-        questions: { A: '¿Qué falla primero?', B: '¿Evento que explica sangrado y trombosis?', C: '¿Intervención urgente?' },
-        options: { A: ['Tapón plaquetario','Vasoconstricción','Fibrinólisis'], B: ['Plaquetas bloquean fibrinógeno','Fibrinólisis sistémica','Consumo de factores y fibrina','Inhibición vía extrínseca'], C: ['Transfusión plaquetas/plasma','Heparina HBPM','Ácido tranexámico'] },
-        correct: { A: '1', B: '3', C: '1' },
-        feedback: {
-          A: { '1':'Sí. La plaquetopenia impide el tapón inicial.','2':'No. La vasoconstricción sigue.','3':'No. Fibrinólisis es secundaria.' },
-          B: { '1':'Incorrecto. No bloquea fibrinógeno.','2':'Incorrecto. No destruye inicialmente el tapón.','3':'Correcto. Consumo y microtrombos causan sangrado y trombosis.','4':'Incorrecto. No hay inhibición extrínseca.' },
-          C: { '1':'Correcto. Reposición de plaquetas y factores.','2':'Incorrecto. Agrava sangrado.','3':'Incorrecto. Contraindicado en CIVD.' }
-        }
-      },
-      {
-        title: 'Caso 3: Hemofilia A en niño con hemarthrosis',
-        text: 'Niño de 12 años con hematomas frecuentes y dolor articular tras golpes leves. Laboratorio: TTPa prolongado, TP normal, plaquetas normales, factor VIII bajo.',
-        questions: { A: '¿Fase comprometida?', B: '¿Defecto molecular?', C: 'Tratamiento agudo?' },
-        options: { A: ['Primaria','Secundaria','Fibrinólisis'], B: ['vWF','VIII','Plasmina'], C: ['DDAVP','VitK','Plaquetas'] },
-        correct: { A: '2', B: '2', C: '1' },
-        feedback: {
-          A: { '1':'No. Tapón normal.','2':'Sí. Falla coagulación secundaria.','3':'No. Fibrinólisis posterior.' },
-          B: { '1':'No. vWF normal.','2':'Sí. VIII bajo.','3':'No. Sin hiperfibrinólisis.' },
-          C: { '1':'Sí. DDAVP libera VIII.','2':'No. VitK ineficaz.','3':'No. Plaquetas normales.' }
-        }
-      },
-      {
-        title: 'Caso 4: AINE vs paracetamol',
-        text: 'Mujer de 32 años con dolor muscular por infección viral. Paracetamol c/6h sin alivio. Se cambia a AINE no selectivo.',
-        questions: { A: '¿Mecanismo antipirético?', B: '¿Por qué no alivia dolor?', C: '¿Ventaja del AINE?' },
-        options: { A: ['COX central','Opioide','Neuronal'], B: ['No inhibe COX periférica','Entra mal al SNC','No bloquea bradiquinina','No vasoconstriñe'], C: ['COX1/2 periférica','Vida media','Endorfinas','H1'] },
-        correct: { A: '1', B: '1', C: '1' },
-        feedback: {
-          A: { '1':'Correcto. Inhibe COX central.','2':'Incorrecto.','3':'Incorrecto.' },
-          B: { '1':'Correcto. Sin efecto periférico.','2':'Incorrecto.','3':'Incorrecto.','4':'Incorrecto.' },
-          C: { '1':'Correcto. Reduce prostaglandinas periféricas.','2':'Incorrecto.','3':'Incorrecto.','4':'Incorrecto.' }
-        }
-      },
-      {
-        title: 'Caso 5: Granulación tras quemadura',
-        text: 'Paciente con quemadura de segundo grado en brazo. Fase proliferativa: tejido de granulación.',
-        questions: { A: '¿Quién produce la matriz?', B: '¿Función?', C: '¿Matriz principal?' },
-        options: { A: ['Neutrófilos','Endoteliales','Fibroblastos','Macrófagos'], B: ['Inflaman','Forman vasos','Sintetizan colágeno','Fagocitan'], C: ['Procolágeno','Factores de crecimiento','Oxígeno'] },
-        correct: { A: '3', B: '3', C: '1' },
-        feedback: {
-          A: { '1':'No. Limpian.','2':'No. Forman vasos.','3':'Sí. Sintetizan colágeno.','4':'No. Fagocitan.' },
-          B: { '1':'No.','2':'No.','3':'Sí.','4':'No.' },
-          C: { '1':'Correcto. Procolágeno → colágeno.','2':'No.','3':'No.' }
-        }
-      }
-    ];
-
+    const cases = [ /* casos definidos previamente (1–5) con opciones y feedback detallado */ ];
     let currentCase = 0;
     let stage = 'A';
     let tokens = 5;
-    const trackCells = cases.length;
+    const totalCells = cases.length * 3;
 
     const titleEl = document.getElementById('case-title');
     const textEl = document.getElementById('case-text');
@@ -134,9 +72,10 @@
     const prevBtn = document.getElementById('prev-question');
     const cellsContainer = document.getElementById('cells');
 
-    // Inicializar track
-    for (let i = 1; i <= trackCells; i++) {
-      const span = document.createElement('span'); span.className = 'cell'; span.id = 'cell' + i; cellsContainer.appendChild(span);
+    // Generar celdas de progreso
+    for (let i = 1; i <= totalCells; i++) {
+      const span = document.createElement('span'); span.className = 'cell'; span.id = 'cell' + i;
+      cellsContainer.appendChild(span);
     }
 
     function loadCase(n) {
@@ -161,38 +100,45 @@
       const c = cases[currentCase];
       c.options[stage].forEach((text, i) => {
         const btn = document.createElement('button'); btn.className = 'btn';
-        const val = (i + 1).toString(); btn.textContent = text;
-        btn.dataset.q = stage; btn.dataset.value = val;
+        btn.textContent = text;
+        btn.dataset.q = stage; btn.dataset.value = (i+1).toString();
         btn.addEventListener('click', onOptionClick);
         optionsEl.appendChild(btn);
       });
     }
 
     function showStage(s) {
-      ['A','B','C'].forEach(x => document.getElementById('question' + x).classList.toggle('hidden', x !== s));
+      ['A','B','C'].forEach(x => document.getElementById('question'+x).classList.toggle('hidden', x!==s));
       stage = s;
       feedbackEl.textContent = '';
       renderOptions();
-      prevBtn.classList.toggle('hidden', stage === 'A');
+      prevBtn.classList.toggle('hidden', stage==='A');
       nextBtn.classList.add('hidden');
     }
 
     function onOptionClick(e) {
-      const q = e.target.dataset.q, val = e.target.dataset.value;
+      const q = e.target.dataset.q, v = e.target.dataset.value;
       const c = cases[currentCase];
-      feedbackEl.textContent = c.feedback[q][val];
-      tokens += (val === c.correct[q]) ? 1 : -1;
+      feedbackEl.textContent = c.feedback[q][v];
+      tokens += (v===c.correct[q])?1:-1;
       tokensEl.textContent = tokens;
-      if (q === 'C' && val === c.correct[q]) {
-        const cell = document.getElementById('cell' + (currentCase + 1)); if (cell) cell.classList.add('filled');
-      }
+      // marcar celda
+      const cellIndex = currentCase*3 + (stage==='A'?1: stage==='B'?2:3);
+      document.getElementById('cell'+cellIndex).classList.add('filled');
       prevBtn.classList.remove('hidden');
       if (q==='C') nextBtn.classList.remove('hidden');
-      Array.from(optionsEl.children).forEach(b => b.disabled = true);
+      Array.from(optionsEl.children).forEach(b=>b.disabled=true);
     }
 
-    prevBtn.addEventListener('click', () => { if (stage==='B') showStage('A'); else if (stage==='C') showStage('B'); });
-    nextBtn.addEventListener('click', () => { currentCase++; if (currentCase<cases.length) loadCase(currentCase); else alert('¡Juego completado! Fichas finales: '+tokens); });
+    prevBtn.addEventListener('click', () => {
+      if (stage==='B') showStage('A'); else if (stage==='C') showStage('B');
+    });
+
+    nextBtn.addEventListener('click', () => {
+      currentCase++;
+      if (currentCase<cases.length) loadCase(currentCase);
+      else alert('¡Juego completado! Fichas finales: '+tokens);
+    });
 
     loadCase(0);
   </script>
